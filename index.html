@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Jaringan Komputer - Game Edukasi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .drop-zone {
+            transition: all 0.3s ease;
+        }
+
+        .drop-zone.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.2);
+            transform: scale(1.02);
+        }
+
+        .match-card {
+            transition: all 0.2s ease;
+        }
+
+        .match-card.selected {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.2);
+            transform: translateX(5px);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .animate-float { animation: float 4s ease-in-out infinite; }
+
+        .certificate-bg {
+            background: white;
+            color: #1e293b;
+            border: 12px double #1e293b;
+            padding: 40px;
+            position: relative;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-primary:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            #certificate-print, #certificate-print * { visibility: visible; }
+            #certificate-print { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-900 to-blue-900">
+
+    <!-- Audio Elements -->
+    <audio id="bg-music" loop>
+        <!-- Menggunakan Raw Link GitHub agar audio dapat diputar langsung -->
+        <source src="https://raw.githubusercontent.com/megysyahputra83/musikjarkom/main/Saturday_Morning_High.mp3" type="audio/mpeg">
+    </audio>
+    
+    <div id="game-container" class="w-full max-w-4xl glass rounded-[2rem] overflow-hidden min-h-[650px] flex flex-col border border-white/5">
+        <!-- Bagian Header -->
+        <div class="p-6 border-b border-white/10 flex justify-between items-center bg-blue-600/10">
+            <div class="flex items-center gap-4">
+                <div class="p-2 bg-blue-500/20 rounded-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight">NET-MASTER <span class="text-blue-400 text-sm font-normal">v1.2</span></h1>
+                
+                <!-- Tombol Kontrol Musik -->
+                <button onclick="toggleMusic()" id="music-btn" class="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-700 px-3 py-1.5 rounded-full border border-white/10 transition-all">
+                    <div id="music-indicator" class="w-2 h-2 rounded-full bg-red-500"></div>
+                    <svg id="icon-music-on" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 hidden" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 3v11.13a3 3 0 102 2.87V5.4l9-1.8v11.53a3 3 0 102 2.87V3z" />
+                    </svg>
+                    <svg id="icon-music-off" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                    <span id="music-status-text" class="text-[10px] uppercase font-bold tracking-widest text-slate-400">Audio Off</span>
+                </button>
+            </div>
+            
+            <div id="stats" class="flex gap-4 text-sm font-semibold hidden">
+                <div class="bg-slate-800/80 px-4 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                    <span class="text-slate-400">Skor:</span>
+                    <span id="current-score" class="text-green-400 text-lg">0</span>
+                </div>
+                <div class="bg-slate-800/80 px-4 py-1.5 rounded-xl border border-white/10 flex items-center gap-2">
+                    <span class="text-slate-400">Level:</span>
+                    <span id="current-level" class="text-blue-400">1</span><span class="text-slate-500">/3</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Layar Mulai -->
+        <div id="screen-start" class="flex-grow flex flex-col items-center justify-center p-8 text-center">
+            <div class="w-40 h-40 bg-blue-500/10 rounded-full flex items-center justify-center mb-8 animate-float relative">
+                <div class="absolute inset-0 bg-blue-400/20 rounded-full blur-2xl"></div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-20 h-20 text-blue-400 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <h2 class="text-5xl font-extrabold mb-4 tracking-tight">Master Jaringan</h2>
+            <p class="text-slate-400 mb-10 max-w-md text-lg leading-relaxed">Uji keahlianmu dalam infrastruktur jaringan komputer melalui 3 tantangan interaktif.</p>
+            
+            <div class="w-full max-w-sm mb-8 space-y-3">
+                <label class="block text-xs font-bold uppercase tracking-widest text-blue-400 text-left px-2">Identitas Siswa</label>
+                <input type="text" id="player-name" placeholder="Masukkan Nama Lengkap Anda..." class="w-full bg-slate-800/50 border border-white/10 rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all text-center text-lg placeholder:text-slate-600">
+            </div>
+
+            <button onclick="startGame()" class="btn-primary text-white font-bold py-5 px-16 rounded-2xl transition-all active:scale-95 text-xl">
+                MULAI PERMAINAN
+            </button>
+            <p class="text-slate-500 mt-6 text-xs italic">Musik akan otomatis diputar saat permainan dimulai.</p>
+        </div>
+
+        <!-- Level 1: Drag and Drop -->
+        <div id="screen-level1" class="hidden flex-grow flex flex-col p-10">
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded">LEVEL 01</span>
+                    <h3 class="text-3xl font-bold">Arsitektur Topologi</h3>
+                </div>
+                <p class="text-slate-400">Cocokkan nama topologi dengan deskripsi teknisnya.</p>
+            </div>
+
+            <div class="flex flex-wrap gap-4 mb-12 justify-center">
+                <div draggable="true" ondragstart="drag(event)" id="topo-star" class="bg-blue-600/80 border border-blue-400/30 px-8 py-4 rounded-2xl cursor-move font-bold shadow-xl active:opacity-50 hover:bg-blue-500">STAR</div>
+                <div draggable="true" ondragstart="drag(event)" id="topo-bus" class="bg-blue-600/80 border border-blue-400/30 px-8 py-4 rounded-2xl cursor-move font-bold shadow-xl active:opacity-50 hover:bg-blue-500">BUS</div>
+                <div draggable="true" ondragstart="drag(event)" id="topo-ring" class="bg-blue-600/80 border border-blue-400/30 px-8 py-4 rounded-2xl cursor-move font-bold shadow-xl active:opacity-50 hover:bg-blue-500">RING</div>
+                <div draggable="true" ondragstart="drag(event)" id="topo-mesh" class="bg-blue-600/80 border border-blue-400/30 px-8 py-4 rounded-2xl cursor-move font-bold shadow-xl active:opacity-50 hover:bg-blue-500">MESH</div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="drop-zone p-6 rounded-3xl border-2 border-dashed border-white/10 min-h-[120px] flex flex-col items-center justify-center text-center bg-white/5" ondrop="drop(event, 'topo-star')" ondragover="allowDrop(event)">
+                    <p class="text-sm text-slate-300 font-light italic">Terhubung ke konsentrator pusat (Hub/Switch).</p>
+                </div>
+                <div class="drop-zone p-6 rounded-3xl border-2 border-dashed border-white/10 min-h-[120px] flex flex-col items-center justify-center text-center bg-white/5" ondrop="drop(event, 'topo-bus')" ondragover="allowDrop(event)">
+                    <p class="text-sm text-slate-300 font-light italic">Satu kabel backbone sebagai jalur transmisi utama.</p>
+                </div>
+                <div class="drop-zone p-6 rounded-3xl border-2 border-dashed border-white/10 min-h-[120px] flex flex-col items-center justify-center text-center bg-white/5" ondrop="drop(event, 'topo-ring')" ondragover="allowDrop(event)">
+                    <p class="text-sm text-slate-300 font-light italic">Data mengalir searah melalui setiap node secara melingkar.</p>
+                </div>
+                <div class="drop-zone p-6 rounded-3xl border-2 border-dashed border-white/10 min-h-[120px] flex flex-col items-center justify-center text-center bg-white/5" ondrop="drop(event, 'topo-mesh')" ondragover="allowDrop(event)">
+                    <p class="text-sm text-slate-300 font-light italic">Koneksi point-to-point antar semua perangkat.</p>
+                </div>
+            </div>
+            
+            <div class="mt-auto flex justify-end">
+                <button id="btn-next1" onclick="nextLevel(2)" class="bg-green-600 hover:bg-green-500 px-10 py-4 rounded-2xl font-bold opacity-30 cursor-not-allowed transition-all" disabled>Lanjut Ke Level 2</button>
+            </div>
+        </div>
+
+        <!-- Level 2: Matching Word -->
+        <div id="screen-level2" class="hidden flex-grow flex flex-col p-10">
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-amber-600 text-white text-[10px] font-bold px-2 py-1 rounded">LEVEL 02</span>
+                    <h3 class="text-3xl font-bold">Identifikasi Hardware</h3>
+                </div>
+                <p class="text-slate-400">Hubungkan komponen perangkat keras dengan fungsi operasionalnya.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-10 h-full">
+                <div class="space-y-4">
+                    <button onclick="selectPair(this, 'left', 'router')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-semibold">Router</button>
+                    <button onclick="selectPair(this, 'left', 'switch')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-semibold">Switch</button>
+                    <button onclick="selectPair(this, 'left', 'nic')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-semibold">NIC / LAN Card</button>
+                    <button onclick="selectPair(this, 'left', 'modem')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all font-semibold">Modem</button>
+                </div>
+                <div class="space-y-4">
+                    <button onclick="selectPair(this, 'right', 'nic')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-sm leading-snug">Menyediakan antarmuka fisik antara komputer dan media kabel.</button>
+                    <button onclick="selectPair(this, 'right', 'modem')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-sm leading-snug">Melakukan proses modulasi dan demodulasi sinyal data.</button>
+                    <button onclick="selectPair(this, 'right', 'router')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-sm leading-snug">Menentukan jalur terbaik untuk mengirim paket data antar jaringan.</button>
+                    <button onclick="selectPair(this, 'right', 'switch')" class="match-card w-full text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all text-sm leading-snug">Meneruskan data hanya ke port yang dituju berdasarkan MAC Address.</button>
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-end">
+                <button id="btn-next2" onclick="nextLevel(3)" class="bg-green-600 hover:bg-green-500 px-10 py-4 rounded-2xl font-bold hidden shadow-lg animate-bounce">Tantangan Terakhir</button>
+            </div>
+        </div>
+
+        <!-- Level 3: Multiple Choice -->
+        <div id="screen-level3" class="hidden flex-grow flex flex-col p-10">
+            <div class="mb-8">
+                <div class="flex items-center gap-3 mb-2">
+                    <span class="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded">LEVEL 03</span>
+                    <h3 class="text-3xl font-bold">Kuis Pemahaman</h3>
+                </div>
+                <p class="text-slate-400">Pilih jawaban yang paling tepat untuk menguji pengetahuan teoritis Anda.</p>
+            </div>
+
+            <div class="bg-white/5 p-6 rounded-3xl border border-white/10 mb-8">
+                <h4 id="quiz-question" class="text-xl text-white font-bold mb-0">Memuat pertanyaan...</h4>
+            </div>
+
+            <div id="quiz-options" class="grid grid-cols-1 gap-4">
+                <!-- Opsi disisipkan melalui JS -->
+            </div>
+
+            <div class="mt-10 flex items-center justify-center gap-2">
+                <div class="h-1 w-20 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="progress-bar" class="h-full bg-blue-500 transition-all duration-500" style="width: 25%"></div>
+                </div>
+                <span class="text-slate-500 text-sm font-bold ml-2">PERTANYAAN <span id="quiz-idx">1</span> DARI 4</span>
+            </div>
+        </div>
+
+        <!-- Layar Hasil -->
+        <div id="screen-result" class="hidden flex-grow flex flex-col items-center justify-center p-12 text-center">
+            <div class="relative mb-10">
+                <div class="absolute inset-0 bg-yellow-500/20 blur-3xl rounded-full"></div>
+                <div class="text-[120px] relative z-10 animate-float">🎓</div>
+            </div>
+            
+            <h2 class="text-5xl font-black mb-2 tracking-tight">MISI SELESAI!</h2>
+            <p class="text-xl text-slate-400 mb-10 italic">Luar biasa, <span id="display-name" class="text-blue-400 font-bold not-italic">Siswa</span>!</p>
+            
+            <div class="flex gap-8 mb-12">
+                <div class="bg-white/5 p-8 rounded-3xl border border-white/10 backdrop-blur-md min-w-[200px]">
+                    <p class="text-xs uppercase tracking-[0.2em] text-slate-500 mb-1">TOTAL SKOR</p>
+                    <p id="final-score" class="text-7xl font-black text-white leading-none">0</p>
+                </div>
+            </div>
+
+            <div class="flex gap-4">
+                <button onclick="location.reload()" class="bg-slate-800 hover:bg-slate-700 px-8 py-4 rounded-2xl font-bold transition-all flex items-center gap-2 border border-white/5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 110 2H4a1 1 0 01-1-1V3a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                    Ulangi
+                </button>
+                <button onclick="showCertificate()" class="btn-primary px-10 py-4 rounded-2xl font-black shadow-2xl flex items-center gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg>
+                    KLAIM SERTIFIKAT
+                </button>
+            </div>
+        </div>
+
+        <!-- Layar Sertifikat -->
+        <div id="screen-certificate" class="hidden flex-grow flex flex-col items-center p-12 overflow-y-auto">
+            <div id="certificate-print" class="certificate-bg w-full max-w-3xl shadow-[0_35px_60px_-15px_rgba(0,0,0,0.6)] rounded-sm border-slate-900">
+                <div class="border-[4px] border-slate-800 p-10 text-center relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full opacity-30"></div>
+                    <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-50 rounded-full opacity-30"></div>
+
+                    <h1 class="text-4xl font-serif font-black text-slate-900 mb-2 tracking-widest uppercase">Sertifikat Kelulusan</h1>
+                    <p class="text-slate-500 font-serif italic mb-10 text-lg uppercase tracking-widest">Penghargaan Ekselensi Jaringan</p>
+                    
+                    <p class="text-slate-600 mb-4">Diberikan dengan hormat kepada:</p>
+                    <h2 id="cert-name" class="text-5xl font-serif font-bold text-blue-900 mb-8 border-b-2 border-blue-900/20 inline-block pb-2 px-10">SISWA TELADAN</h2>
+                    
+                    <p class="text-slate-700 leading-relaxed max-w-xl mx-auto mb-12 text-lg">
+                        Telah menunjukkan kemahiran yang luar biasa dan menyelesaikan seluruh modul evaluasi pada simulasi interaktif
+                        <span class="font-bold">Networking Master Academy (Kelas 10)</span>.
+                    </p>
+
+                    <div class="grid grid-cols-3 items-end mt-12 gap-4">
+                        <div class="text-left">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Pencapaian Skor</p>
+                            <p id="cert-score" class="text-3xl font-serif font-bold text-slate-800">100 / 100</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="w-24 h-24 bg-blue-900 rounded-full flex items-center justify-center border-[6px] border-slate-100 shadow-xl text-white font-serif font-bold text-xl relative z-10">
+                                LULUS
+                            </div>
+                            <div class="w-1 bg-slate-200 h-8 -mt-1"></div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Terbit Pada</p>
+                            <p id="cert-date" class="text-lg font-serif font-semibold text-slate-800">01 Januari 2024</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-12 flex gap-4 no-print">
+                <button onclick="window.print()" class="bg-green-600 hover:bg-green-500 px-12 py-4 rounded-2xl font-bold flex items-center gap-3 shadow-lg transform transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" /></svg>
+                    CETAK SERTIFIKAT
+                </button>
+                <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 px-10 py-4 rounded-2xl font-bold">Menu Utama</button>
+            </div>
+        </div>
+
+        <!-- Toast Notifikasi -->
+        <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl bg-blue-600 shadow-2xl text-white font-bold transition-all transform translate-y-32 opacity-0 z-[100] flex items-center gap-3">
+            <span id="toast-icon">✨</span>
+            <span id="toast-msg">Pesan...</span>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            name: "",
+            score: 0,
+            currentLevel: 1,
+            l1Matches: 0,
+            l2Matches: 0,
+            l3Index: 0,
+            l2Selected: null,
+            musicPlaying: false
+        };
+
+        const bgMusic = document.getElementById('bg-music');
+        const iconOn = document.getElementById('icon-music-on');
+        const iconOff = document.getElementById('icon-music-off');
+        const musicIndicator = document.getElementById('music-indicator');
+        const musicStatusText = document.getElementById('music-status-text');
+
+        const quizData = [
+            {
+                q: "Topologi mana yang sangat bergantung pada perangkat pusat seperti Switch?",
+                options: ["Topologi BUS", "Topologi STAR", "Topologi RING", "Topologi MESH"],
+                correct: 1
+            },
+            {
+                q: "Alamat logis yang digunakan untuk mengidentifikasi komputer di jaringan global adalah...",
+                options: ["MAC Address", "Port Address", "IP Address", "Subnet Mask"],
+                correct: 2
+            },
+            {
+                q: "Perangkat yang berfungsi memperkuat sinyal yang lemah akibat jarak kabel yang jauh disebut...",
+                options: ["Repeater", "Bridge", "Server", "Client"],
+                correct: 0
+            },
+            {
+                q: "Satuan kecepatan transfer data dalam jaringan komputer biasanya dinyatakan dalam...",
+                options: ["Kilometer per jam", "Hertz (Hz)", "Bits per second (bps)", "Watt"],
+                correct: 2
+            }
+        ];
+
+        // --- Logika Audio ---
+        function toggleMusic() {
+            if (gameState.musicPlaying) {
+                bgMusic.pause();
+                iconOn.classList.add('hidden');
+                iconOff.classList.remove('hidden');
+                musicIndicator.classList.replace('bg-green-400', 'bg-red-500');
+                musicStatusText.innerText = "Audio Off";
+                musicStatusText.classList.replace('text-green-400', 'text-slate-400');
+            } else {
+                const playPromise = bgMusic.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        iconOn.classList.remove('hidden');
+                        iconOff.classList.add('hidden');
+                        musicIndicator.classList.replace('bg-red-500', 'bg-green-400');
+                        musicStatusText.innerText = "Audio On";
+                        musicStatusText.classList.replace('text-slate-400', 'text-green-400');
+                    }).catch(error => {
+                        console.log("Autoplay dicegah. Pengguna perlu berinteraksi.");
+                        showToast("Aktifkan audio dengan klik!", "bg-amber-600");
+                    });
+                }
+            }
+            gameState.musicPlaying = !gameState.musicPlaying;
+        }
+
+        // --- Fungsi Utama ---
+        function startGame() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            if (!nameInput) {
+                showToast("⚠️ Masukkan nama Anda terlebih dahulu!", "bg-red-500");
+                return;
+            }
+            
+            // Coba putar musik
+            if (!gameState.musicPlaying) toggleMusic();
+            
+            gameState.name = nameInput;
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-level1').classList.remove('hidden');
+            document.getElementById('stats').classList.remove('hidden');
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('current-score').innerText = gameState.score;
+            document.getElementById('current-level').innerText = gameState.currentLevel;
+        }
+
+        function showToast(msg, color = "bg-blue-600") {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-msg');
+            msgEl.innerText = msg;
+            toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl ${color} shadow-2xl text-white font-bold transition-all z-[100] flex items-center gap-3 transform`;
+            toast.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-32', 'opacity-0');
+            }, 2000);
+        }
+
+        function nextLevel(lvl) {
+            const screens = ['screen-level1', 'screen-level2', 'screen-level3', 'screen-result'];
+            screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+            
+            if (lvl === 'result') {
+                showResults();
+            } else {
+                gameState.currentLevel = lvl;
+                document.getElementById(`screen-level${lvl}`).classList.remove('hidden');
+                if (lvl === 3) renderQuiz();
+                updateStats();
+            }
+        }
+
+        // --- Level 1: Logika Drag & Drop ---
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.id);
+        }
+
+        function drop(ev, targetId) {
+            ev.preventDefault();
+            let dataId = ev.dataTransfer.getData("text");
+            
+            if (dataId === targetId) {
+                let el = document.getElementById(dataId);
+                el.setAttribute('draggable', 'false');
+                el.classList.replace('bg-blue-600/80', 'bg-green-600');
+                el.classList.add('scale-90', 'opacity-50');
+                
+                ev.target.innerHTML = `<div class="bg-green-500 text-white p-2 rounded-xl font-bold mb-2 w-full">MATCHED</div>` + ev.target.innerHTML;
+                ev.target.classList.add('border-green-500', 'bg-green-500/10');
+                ev.target.ondrop = null;
+                
+                gameState.score += 10;
+                gameState.l1Matches++;
+                showToast("Sempurna! +10", "bg-green-600");
+                updateStats();
+
+                if (gameState.l1Matches === 4) {
+                    const btn = document.getElementById('btn-next1');
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-30', 'cursor-not-allowed');
+                }
+            } else {
+                showToast("Salah! Coba deskripsi lain.", "bg-red-500");
+            }
+        }
+
+        // --- Level 2: Logika Matching ---
+        function selectPair(el, side, id) {
+            if (el.classList.contains('bg-green-600')) return;
+
+            const cards = document.querySelectorAll('.match-card');
+            cards.forEach(c => {
+                if (c.dataset.side === side) c.classList.remove('selected');
+            });
+
+            el.classList.add('selected');
+            el.dataset.side = side;
+            el.dataset.val = id;
+
+            if (gameState.l2Selected && gameState.l2Selected.side !== side) {
+                if (gameState.l2Selected.val === id) {
+                    document.querySelectorAll(`[data-val="${id}"]`).forEach(c => {
+                        c.classList.remove('selected', 'bg-white/5');
+                        c.classList.add('bg-green-600', 'text-white', 'border-green-400');
+                        c.onclick = null;
+                    });
+                    gameState.score += 15;
+                    gameState.l2Matches++;
+                    gameState.l2Selected = null;
+                    showToast("Pasangan Tepat! +15", "bg-green-600");
+                    updateStats();
+
+                    if (gameState.l2Matches === 4) {
+                        document.getElementById('btn-next2').classList.remove('hidden');
+                    }
+                } else {
+                    showToast("Bukan pasangannya!", "bg-red-500");
+                    document.querySelectorAll('.selected').forEach(c => c.classList.remove('selected'));
+                    gameState.l2Selected = null;
+                }
+            } else {
+                gameState.l2Selected = { side, val: id };
+            }
+        }
+
+        // --- Level 3: Logika Kuis ---
+        function renderQuiz() {
+            const data = quizData[gameState.l3Index];
+            const qEl = document.getElementById('quiz-question');
+            qEl.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                qEl.innerText = data.q;
+                qEl.classList.remove('opacity-0');
+                document.getElementById('quiz-idx').innerText = gameState.l3Index + 1;
+                document.getElementById('progress-bar').style.width = ((gameState.l3Index + 1) / 4 * 100) + '%';
+                
+                const optionsContainer = document.getElementById('quiz-options');
+                optionsContainer.innerHTML = '';
+                
+                data.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = "text-left p-5 rounded-2xl border border-white/10 bg-white/5 hover:bg-blue-600 hover:scale-[1.02] transition-all font-semibold transform duration-200";
+                    btn.innerText = opt;
+                    btn.onclick = () => checkQuiz(i);
+                    optionsContainer.appendChild(btn);
+                });
+            }, 300);
+        }
+
+        function checkQuiz(idx) {
+            const data = quizData[gameState.l3Index];
+            if (idx === data.correct) {
+                gameState.score += 20;
+                showToast("Jawaban Benar! +20", "bg-green-600");
+            } else {
+                showToast("Ups, Jawaban Kurang Tepat!", "bg-red-500");
+            }
+            
+            gameState.l3Index++;
+            if (gameState.l3Index < quizData.length) {
+                renderQuiz();
+            } else {
+                setTimeout(() => nextLevel('result'), 1000);
+            }
+            updateStats();
+        }
+
+        // --- Logika Layar Akhir ---
+        function showResults() {
+            document.getElementById('display-name').innerText = gameState.name;
+            document.getElementById('final-score').innerText = gameState.score;
+        }
+
+        function showCertificate() {
+            document.getElementById('screen-result').classList.add('hidden');
+            document.getElementById('screen-certificate').classList.remove('hidden');
+            document.getElementById('game-container').classList.replace('max-w-4xl', 'max-w-5xl');
+            
+            document.getElementById('cert-name').innerText = gameState.name.toUpperCase();
+            document.getElementById('cert-score').innerText = gameState.score + " / 120";
+            
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('cert-date').innerText = dateStr;
+        }
+
+    </script>
+</body>
+</html>
